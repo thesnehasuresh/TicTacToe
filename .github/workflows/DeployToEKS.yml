@@ -1,0 +1,101 @@
+name: Deploy TictacToe, a NodeJS based application to EKS Cluster
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Install NPM Dependency and run test
+      run: |
+        npm install
+        npm test
+  
+  code-scan:
+    runs-on: [self-hosted]
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Run SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.3.0
+      env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      with:
+        projectBaseDir: .
+    - name: SonarQube Quality Gate check
+      id: sonarqube-quality-gate-check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      with:
+       pollingTimeoutSec: 600
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    - name: "Example show SonarQube Quality Gate Status value"
+      run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+    - name: Scan FS using Trivy to detect issues in repo
+      uses:  aquasecurity/trivy-action@0.32.0
+      with:
+        scan-type: 'fs'
+        ignore-unfixed: true
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL'
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+  
+  buildandPushImage:
+    runs-on: [self-hosted]
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
+      with:
+        role-to-assume:  ${{{secrets.IAM_Role_with_OIDC}} #arn:aws:iam::123456789012:role/my-github-actions-role
+        aws-region: ${{secrets.aws_region}}
+    - name: Login to Amazon ECR
+      id: login-aws-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    - name: Build, tag, and push docker image to Amazon ECR
+      env:
+        REGISTRY: ${{ steps.login-aws-ecr.outputs.registry }}
+        REPOSITORY: ${{secrets.ecr-repo}}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+    - name: Image Scan using Trivy
+      uses: aquasecurity/trivy-action@0.32.0
+      with:
+        image-ref: '${{secrets.aws_accountID}}.dkr.ecr.${{}secrets.aws_region}.amazonaws.com/${{secerts.ecr-repo}}:${{ github.sha }}'
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+        
+  deployToEKS:
+    runs-on: [self-hosted]
+    steps:
+    - name: Update kubeconfig with currrent context
+      run: aws eks update kube-config --region ${{secrets.aws_region}} --name ${{secrets.eks_cluster}}
+    - name: Deploy to EKS cluster
+      run: |
+        kubectl apply -f deployment.yml
+        kubectl apply -f service.yml
+    - name: Send Slack Notification
+      if: always ()
+      uses: slackapi/slack-github-action@v2.1.1
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+          text: "*GitHub Action build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
