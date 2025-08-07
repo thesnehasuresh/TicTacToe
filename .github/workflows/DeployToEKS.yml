@@ -75,7 +75,7 @@ jobs:
     - name: Image Scan using Trivy
       uses: aquasecurity/trivy-action@0.32.0
       with:
-        image-ref: '${{secerts.ecr-repo}}:${{ env.IMAGE_TAG }}'
+        image-ref: '${{secrets.ecr-repo}}:${{ env.IMAGE_TAG }}'
         format: 'table'
         exit-code: '1'
         ignore-unfixed: true
