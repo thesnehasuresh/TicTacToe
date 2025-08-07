@@ -54,9 +54,13 @@ jobs:
       with:
         name: trivy-results.sarif
         path: ./trivy-results.sarif
+  
   buildandPushImage:
     needs: code-scan
     runs-on: [self-hosted, Linux, X64]
+    permissions:
+      id-token: write
+      contents: read
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
