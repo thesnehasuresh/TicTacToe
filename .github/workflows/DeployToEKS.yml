@@ -53,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: trivy-results.sarif
-        path: ./Reports/trivy-results.sarif
+        path: ./trivy-results.sarif
   buildandPushImage:
     needs: code-scan
     runs-on: [self-hosted, Linux, X64]
