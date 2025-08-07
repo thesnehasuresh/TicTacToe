@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    - name: Install NPM Dependency and run test
+    - name: Install NPM Dependency and run test for the same
       run: |
         npm install
         npm test
