@@ -80,10 +80,11 @@ jobs:
       run: |
         docker build -t $REPOSITORY:$IMAGE_TAG .
         docker push $REPOSITORY:$IMAGE_TAG
+        echo "IMAGE_NAME=$REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
     - name: Image Scan using Trivy
       uses: aquasecurity/trivy-action@0.32.0
       with:
-        image-ref: '${{secrets.ecr-repo}}:${{ env.IMAGE_TAG }}'
+        image-ref: '${{ env.IMAGE_NAME }}'
         format: 'table'
         exit-code: '1'
         ignore-unfixed: true
