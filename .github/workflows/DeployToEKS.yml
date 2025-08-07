@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: linux-self
+    runs-on: [linux-self]
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
@@ -17,7 +17,7 @@ jobs:
         npm test
   
   code-scan:
-    runs-on: linux-self
+    runs-on: [linux-self]
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
         sarif_file: 'trivy-results.sarif'
   
   buildandPushImage:
-    runs-on: linux-self
+    runs-on: [linux-self]
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -83,7 +83,7 @@ jobs:
         severity: 'CRITICAL,HIGH'
         
   deployToEKS:
-    runs-on: linux-self
+    runs-on: [linux-self]
     steps:
     - name: Update kubeconfig with currrent context
       run: aws eks update kube-config --region ${{secrets.aws_region}} --name ${{secrets.eks_cluster}}
