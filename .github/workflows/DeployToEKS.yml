@@ -41,8 +41,6 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-    - name: "Example show SonarQube Quality Gate Status value"
-      run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
     - name: Scan FS using Trivy to detect issues in repo
       uses:  aquasecurity/trivy-action@0.32.0
       with:
@@ -52,10 +50,10 @@ jobs:
         output: 'trivy-results.sarif'
         severity: 'CRITICAL'
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
+      uses: actions/upload-artifact@v4
       with:
-        sarif_file: 'trivy-results.sarif'
-  
+        name: trivy-results.sarif
+        path: ./Reports/trivy-results.sarif
   buildandPushImage:
     needs: code-scan
     runs-on: [self-hosted, Linux, X64]
