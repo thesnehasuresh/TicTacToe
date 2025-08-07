@@ -67,7 +67,7 @@ jobs:
     - name: Build, tag, and push docker image to Amazon ECR
       env:
         REGISTRY: ${{ steps.login-aws-ecr.outputs.registry }}
-        REPOSITORY: ${{secrets.ecr-repo}}
+        REPOSITORY: ${{secrets.ecr_repo}}
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
@@ -75,7 +75,7 @@ jobs:
     - name: Image Scan using Trivy
       uses: aquasecurity/trivy-action@0.32.0
       with:
-        image-ref: '${{secrets.aws_accountID}}.dkr.ecr.${{}secrets.aws_region}.amazonaws.com/${{secerts.ecr-repo}}:${{ github.sha }}'
+        image-ref: '${{secerts.ecr-repo}}:${{ env.IMAGE_TAG }}'
         format: 'table'
         exit-code: '1'
         ignore-unfixed: true
