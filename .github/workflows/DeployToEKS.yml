@@ -28,7 +28,7 @@ jobs:
       uses: SonarSource/sonarqube-scan-action@v5.3.0
       env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: http://13.60.86.236:9000/
       with:
         projectBaseDir: .
     - name: SonarQube Quality Gate check
