@@ -101,6 +101,9 @@ jobs:
       run: |
         kubectl apply -f deployment.yml
         kubectl apply -f service.yml
+        NODE_PORT=$(kubectl get svc tic-tac-toe-service -o=jsonpath='{.spec.ports[0].nodePort}')
+        PUBLIC_IP=$(kubectl get nodes -o=jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}')
+        echo "Application is accessible at: http://$PUBLIC_IP:$NODE_PORT"
     - name: Send Slack Notification
       if: always ()
       uses: slackapi/slack-github-action@v2.1.1
