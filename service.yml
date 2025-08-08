@@ -7,6 +7,6 @@ spec:
     app: tic-tac-toe
   ports:
   - protocol: TCP
-    nodePort: 80
-    targetPort: 30381
+    port: 80
+    nodePort: 30381
   type: NodePort
