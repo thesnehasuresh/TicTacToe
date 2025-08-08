@@ -7,13 +7,13 @@ spec:
   selector:
     matchLabels:
       app: tic-tac-toe
-    template:
-      metadata:
-        labels:
-          app: tic-tac-oe
-      spec:
-        containers:
+  template:
+    metadata:
+      labels:
+        app: tic-tac-oe
+    spec:
+      containers:
         - name: tic-tac-toe
           image: 071564565580.dkr.ecr.eu-north-1.amazonaws.com/tictactoe:latest
           ports:
-          - containerPort: 3000
+            - containerPort: 3000
