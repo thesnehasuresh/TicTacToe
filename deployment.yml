@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app: tic-tac-oe
+        app: tic-tac-toe
     spec:
       containers:
         - name: tic-tac-toe
