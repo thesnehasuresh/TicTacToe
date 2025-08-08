@@ -96,7 +96,7 @@ jobs:
     needs: buildandPushImage
     steps:
     - name: Update kubeconfig with currrent context
-      run: aws eks update kube-config --region ${{secrets.CLUSTER_AWS_REGION}} --name ${{secrets.eks_cluster}}
+      run: aws eks update-kubeconfig --region ${{secrets.CLUSTER_AWS_REGION}} --name ${{secrets.eks_cluster}}
     - name: Deploy to EKS cluster
       run: |
         kubectl apply -f deployment.yml
