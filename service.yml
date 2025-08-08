@@ -7,6 +7,6 @@ spec:
     app: tic-tac-toe
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 3000
-  type: LoadBalancer
+    nodePort: 80
+    targetPort: 30381
+  type: NodePort
